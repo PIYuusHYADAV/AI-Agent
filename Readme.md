@@ -56,8 +56,8 @@ Request ──▶ Validate ──▶ Plan ──▶ Search ──▶ Read ──
 ### Installation
 
 ```bash
-git clone https://github.com/yourusername/multi-agent-research
-cd multi-agent-research
+git clone https://github.com/PIYuusHYADAV/AI-Agent
+cd AI_Agent
 npm install
 ```
 
