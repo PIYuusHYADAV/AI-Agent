@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Deep Research Agent</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0b0e17;
+        --surface: #111827;
+        --border: #1e2d45;
+        --blue: #3b82f6;
+        --blue-dim: #1d3a6b;
+        --cyan: #22d3ee;
+        --text: #e2e8f0;
+        --muted: #64748b;
+        --green: #10b981;
+        --amber: #f59e0b;
+        --red: #ef4444;
+        --mono: "IBM Plex Mono", monospace;
+        --sans: "Inter", sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        min-height: 100vh;
+        line-height: 1.6;
+      }
+
+      /* ── HEADER ── */
+      header {
+        border-bottom: 1px solid var(--border);
+        padding: 1.25rem 2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        position: sticky;
+        top: 0;
+        background: rgba(11, 14, 23, 0.92);
+        backdrop-filter: blur(12px);
+        z-index: 100;
+      }
+
+      .logo-pulse {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--cyan);
+        box-shadow: 0 0 8px var(--cyan);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+
+      header h1 {
+        font-family: var(--mono);
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: var(--text);
+      }
+
+      header h1 span {
+        color: var(--cyan);
+      }
+
+      .header-tag {
+        margin-left: auto;
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 0.2rem 0.6rem;
+        border-radius: 3px;
+      }
+
+      /* ── MAIN LAYOUT ── */
+      main {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem 5rem;
+      }
+
+      /* ── HERO INPUT ── */
+      .hero {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
+
+      .hero-eyebrow {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--cyan);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        margin-bottom: 1.2rem;
+      }
+
+      .hero h2 {
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        font-weight: 300;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        margin-bottom: 0.5rem;
+      }
+
+      .hero h2 strong {
+        font-weight: 600;
+      }
+
+      .hero-sub {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-bottom: 2.5rem;
+      }
+
+      /* ── SEARCH BAR ── */
+      .search-wrap {
+        display: flex;
+        gap: 0;
+        max-width: 620px;
+        margin: 0 auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+        transition: border-color 0.2s;
+      }
+
+      .search-wrap:focus-within {
+        border-color: var(--blue);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+      }
+
+      .search-wrap input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        padding: 1rem 1.2rem;
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 0.95rem;
+      }
+
+      .search-wrap input::placeholder {
+        color: var(--muted);
+      }
+
+      .search-wrap button {
+        background: var(--blue);
+        border: none;
+        padding: 0 1.5rem;
+        color: #fff;
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.15s;
+      }
+
+      .search-wrap button:hover {
+        background: #2563eb;
+      }
+      .search-wrap button:disabled {
+        background: var(--blue-dim);
+        cursor: not-allowed;
+      }
+
+      /* ── SUGGESTIONS ── */
+      .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 1.25rem;
+      }
+
+      .chip {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        padding: 0.3rem 0.75rem;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .chip:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+
+      /* ── LOADER ── */
+      #loader {
+        display: none;
+        margin: 3rem auto;
+        text-align: center;
+      }
+
+      .radar {
+        width: 64px;
+        height: 64px;
+        margin: 0 auto 1.5rem;
+        position: relative;
+      }
+
+      .radar-ring {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        border: 1.5px solid var(--cyan);
+        opacity: 0;
+        animation: sonar 2s ease-out infinite;
+      }
+
+      .radar-ring:nth-child(2) {
+        animation-delay: 0.6s;
+      }
+      .radar-ring:nth-child(3) {
+        animation-delay: 1.2s;
+      }
+
+      @keyframes sonar {
+        0% {
+          transform: scale(0.2);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+
+      .radar-dot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--cyan);
+        box-shadow: 0 0 10px var(--cyan);
+      }
+
+      .loader-status {
+        font-family: var(--mono);
+        font-size: 0.8rem;
+        color: var(--cyan);
+        margin-bottom: 0.4rem;
+      }
+
+      .loader-sub {
+        font-size: 0.78rem;
+        color: var(--muted);
+      }
+
+      /* ── ERROR ── */
+      #error-box {
+        display: none;
+        border: 1px solid var(--red);
+        background: rgba(239, 68, 68, 0.07);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        font-size: 0.875rem;
+        color: #fca5a5;
+        margin-bottom: 2rem;
+      }
+
+      /* ── REPORT ── */
+      #report {
+        display: none;
+      }
+
+      .report-header {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .report-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+      }
+
+      .badge {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 3px;
+        letter-spacing: 0.05em;
+      }
+
+      .badge-blue {
+        background: var(--blue-dim);
+        color: #93c5fd;
+        border: 1px solid #1e4080;
+      }
+      .badge-green {
+        background: rgba(16, 185, 129, 0.1);
+        color: #6ee7b7;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+      }
+      .badge-amber {
+        background: rgba(245, 158, 11, 0.1);
+        color: #fde68a;
+        border: 1px solid rgba(245, 158, 11, 0.3);
+      }
+
+      .report-title {
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        margin-bottom: 0.75rem;
+        line-height: 1.25;
+      }
+
+      .report-summary {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        line-height: 1.7;
+        max-width: 720px;
+      }
+
+      /* ── QUICK STATS STRIP ── */
+      .stats-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 1px;
+        background: var(--border);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 2.5rem;
+      }
+
+      .stat-cell {
+        background: var(--surface);
+        padding: 1rem 1.25rem;
+      }
+
+      .stat-label {
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.35rem;
+      }
+
+      .stat-value {
+        font-family: var(--mono);
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--cyan);
+      }
+
+      /* ── SECTIONS ── */
+      .section-card {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        background: var(--surface);
+        overflow: hidden;
+      }
+
+      .section-head {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.25rem;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s;
+      }
+
+      .section-head:hover {
+        background: rgba(59, 130, 246, 0.05);
+      }
+
+      .section-num {
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        color: var(--muted);
+        min-width: 2ch;
+      }
+
+      .section-heading {
+        flex: 1;
+        font-size: 0.95rem;
+        font-weight: 500;
+      }
+
+      .section-chevron {
+        font-size: 0.7rem;
+        color: var(--muted);
+        transition: transform 0.2s;
+      }
+
+      .section-card.open .section-chevron {
+        transform: rotate(180deg);
+      }
+
+      .section-body {
+        display: none;
+        padding: 0 1.25rem 1.25rem;
+        border-top: 1px solid var(--border);
+      }
+
+      .section-card.open .section-body {
+        display: block;
+      }
+
+      .section-content {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        line-height: 1.75;
+        margin-top: 1rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .keypoints-label {
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        color: var(--blue);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 0.6rem;
+      }
+
+      .keypoints-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-bottom: 1.25rem;
+      }
+
+      .keypoints-list li {
+        font-size: 0.875rem;
+        padding-left: 1.1rem;
+        position: relative;
+        color: var(--text);
+      }
+
+      .keypoints-list li::before {
+        content: "›";
+        position: absolute;
+        left: 0;
+        color: var(--cyan);
+        font-weight: 700;
+      }
+
+      .sources-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .source-link {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--blue);
+        border: 1px solid var(--blue-dim);
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        text-decoration: none;
+        transition: all 0.15s;
+      }
+
+      .source-link:hover {
+        background: var(--blue-dim);
+      }
+
+      /* ── GRID PANELS ── */
+      .panels {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 2rem 0;
+      }
+
+      @media (max-width: 620px) {
+        .panels {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 1.25rem;
+      }
+
+      .panel-title {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .panel-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+      }
+
+      .tag-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      .tag {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        background: rgba(59, 130, 246, 0.08);
+        border: 1px solid var(--blue-dim);
+        color: #93c5fd;
+      }
+
+      .fact-list,
+      .use-list,
+      .limit-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+      }
+
+      .fact-list li,
+      .use-list li {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        padding-left: 1.1rem;
+        position: relative;
+      }
+
+      .fact-list li::before {
+        content: "▸";
+        position: absolute;
+        left: 0;
+        color: var(--green);
+        font-size: 0.6rem;
+        top: 0.25rem;
+      }
+      .use-list li::before {
+        content: "▸";
+        position: absolute;
+        left: 0;
+        color: var(--amber);
+        font-size: 0.6rem;
+        top: 0.25rem;
+      }
+
+      .limit-list li {
+        font-size: 0.85rem;
+        color: #94a3b8;
+        padding-left: 1.1rem;
+        position: relative;
+      }
+
+      .limit-list li::before {
+        content: "!";
+        position: absolute;
+        left: 0;
+        color: var(--red);
+        font-size: 0.7rem;
+        font-weight: 700;
+      }
+
+      /* ── FULL-WIDTH PANELS ── */
+      .outlook-card {
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--cyan);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 1.5rem;
+        margin: 1rem 0;
+      }
+
+      .outlook-card .panel-title {
+        margin-bottom: 0.75rem;
+      }
+
+      .outlook-text {
+        font-size: 0.9rem;
+        color: #94a3b8;
+        line-height: 1.75;
+      }
+
+      /* ── ALL SOURCES ── */
+      .sources-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+      }
+
+      .src-card {
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        padding: 0.75rem 1rem;
+        text-decoration: none;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+
+      .src-card:hover {
+        border-color: var(--blue);
+        background: rgba(59, 130, 246, 0.04);
+      }
+
+      .src-icon {
+        font-size: 0.8rem;
+        margin-top: 0.1rem;
+        color: var(--blue);
+        flex-shrink: 0;
+      }
+
+      .src-title {
+        font-size: 0.8rem;
+        color: var(--text);
+        line-height: 1.4;
+        font-weight: 500;
+      }
+
+      .src-url {
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        color: var(--muted);
+        margin-top: 0.2rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      /* ── SECTION DIVIDER ── */
+      .report-section-label {
+        font-family: var(--mono);
+        font-size: 0.65rem;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        margin: 2.5rem 0 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .report-section-label::before {
+        content: "";
+        width: 24px;
+        height: 1px;
+        background: var(--border);
+      }
+
+      /* ── FOOTER ── */
+      footer {
+        text-align: center;
+        padding: 2rem;
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        color: var(--muted);
+        border-top: 1px solid var(--border);
+      }
+
+      /* ── RESET BTN ── */
+      .reset-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        color: var(--muted);
+        border: 1px solid var(--border);
+        background: transparent;
+        padding: 0.4rem 0.9rem;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 2rem;
+        transition: all 0.15s;
+      }
+
+      .reset-btn:hover {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+
+      @media (max-width: 480px) {
+        header {
+          padding: 1rem;
+        }
+        main {
+          padding: 2rem 1rem 4rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="logo-pulse"></div>
+      <h1>DEEP<span>SEARCH</span></h1>
+      <span class="header-tag">AI / TECH RESEARCH AGENT</span>
+    </header>
+
+    <main>
+      <!-- HERO -->
+      <div class="hero" id="hero-section">
+        <p class="hero-eyebrow">// powered by gemini-2.5-flash</p>
+        <h2>Research any <strong>AI or tech topic</strong><br />in seconds</h2>
+        <p class="hero-sub">
+          Multi-source deep research — sources fetched, validated, and compiled.
+        </p>
+
+        <div class="search-wrap">
+          <input
+            type="text"
+            id="topic-input"
+            placeholder="e.g. Retrieval-Augmented Generation, Claude 3.5, MCP protocol…"
+            autocomplete="off"
+          />
+          <button id="search-btn">RESEARCH →</button>
+        </div>
+
+        <div class="suggestions">
+          <span class="chip" onclick="setTopic('Model Context Protocol')"
+            >Model Context Protocol</span
+          >
+          <span class="chip" onclick="setTopic('OpenAI o3')">OpenAI o3</span>
+          <span class="chip" onclick="setTopic('AI Agents in 2025')"
+            >AI Agents 2025</span
+          >
+          <span class="chip" onclick="setTopic('Vector databases')"
+            >Vector databases</span
+          >
+          <span class="chip" onclick="setTopic('Mixture of Experts LLMs')"
+            >Mixture of Experts</span
+          >
+        </div>
+      </div>
+
+      <!-- ERROR -->
+      <div id="error-box">
+        ⚠ <span id="error-msg">Something went wrong.</span>
+      </div>
+
+      <!-- LOADER -->
+      <div id="loader">
+        <div class="radar">
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div class="radar-ring"></div>
+          <div class="radar-dot"></div>
+        </div>
+        <p class="loader-status" id="loader-status">
+          Initializing research agent…
+        </p>
+        <p class="loader-sub">Fetching sources and building your report</p>
+      </div>
+
+      <!-- REPORT -->
+      <div id="report"></div>
+    </main>
+
+    <footer>
+      DEEPSEARCH — AI RESEARCH AGENT · RESULTS MAY REQUIRE VERIFICATION
+    </footer>
+
+    <script>
+      const input = document.getElementById("topic-input");
+      const btn = document.getElementById("search-btn");
+      const loader = document.getElementById("loader");
+      const status = document.getElementById("loader-status");
+      const errorBox = document.getElementById("error-box");
+      const errorMsg = document.getElementById("error-msg");
+      const reportEl = document.getElementById("report");
+      const heroSec = document.getElementById("hero-section");
+
+      const loaderMessages = [
+        "Initializing research agent…",
+        "Querying web sources…",
+        "Fetching and reading URLs…",
+        "Synthesizing findings…",
+        "Structuring report…",
+        "Almost there…",
+      ];
+
+      let loaderInterval;
+
+      function setTopic(t) {
+        input.value = t;
+        input.focus();
+      }
+
+      function startLoader() {
+        loader.style.display = "block";
+        errorBox.style.display = "none";
+        reportEl.style.display = "none";
+        reportEl.innerHTML = "";
+        heroSec.style.display = "none";
+        let i = 0;
+        status.textContent = loaderMessages[0];
+        loaderInterval = setInterval(() => {
+          i = Math.min(i + 1, loaderMessages.length - 1);
+          status.textContent = loaderMessages[i];
+        }, 4000);
+      }
+
+      function stopLoader() {
+        clearInterval(loaderInterval);
+        loader.style.display = "none";
+      }
+
+      function showError(msg) {
+        stopLoader();
+        errorBox.style.display = "block";
+        errorMsg.textContent = msg;
+        heroSec.style.display = "block";
+      }
+
+      async function doResearch() {
+        const topic = input.value.trim();
+        if (!topic) {
+          input.focus();
+          return;
+        }
+
+        btn.disabled = true;
+        startLoader();
+
+        try {
+          const res = await fetch("/research", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic }),
+          });
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || `Server error ${res.status}`);
+          }
+
+          const data = await res.json();
+          stopLoader();
+          renderReport(data);
+        } catch (e) {
+          showError(e.message || "Failed to reach the research server.");
+        } finally {
+          btn.disabled = false;
+        }
+      }
+
+      btn.addEventListener("click", doResearch);
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") doResearch();
+      });
+
+      /* ── RENDER ── */
+      function safe(str) {
+        const d = document.createElement("div");
+        d.textContent = str ?? "";
+        return d.innerHTML;
+      }
+
+      function renderReport(d) {
+        const srcCount = (d.allSources || []).length;
+        const secCount = (d.sections || []).length;
+        const stackCount = (d.techStack || []).length;
+
+        let html = `
+      <button class="reset-btn" onclick="resetUI()">← New search</button>
+
+      <div class="report-header">
+        <div class="report-meta">
+          <span class="badge badge-blue">${safe(d.topic)}</span>
+          <span class="badge badge-green">${srcCount} sources</span>
+          <span class="badge badge-amber">${safe(new Date(d.generatedAt || Date.now()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }))}</span>
+        </div>
+        <h2 class="report-title">${safe(d.title)}</h2>
+        <p class="report-summary">${safe(d.summary)}</p>
+      </div>
+
+      <div class="stats-strip">
+        <div class="stat-cell">
+          <div class="stat-label">Sections</div>
+          <div class="stat-value">${secCount}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Sources</div>
+          <div class="stat-value">${srcCount}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Key Facts</div>
+          <div class="stat-value">${(d.keyFacts || []).length}</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-label">Use Cases</div>
+          <div class="stat-value">${(d.useCases || []).length}</div>
+        </div>
+      </div>
+    `;
+
+        /* Sections */
+        if (secCount) {
+          html += `<div class="report-section-label">Research Sections</div>`;
+          d.sections.forEach((sec, i) => {
+            const pts = (sec.keyPoints || [])
+              .map((p) => `<li>${safe(p)}</li>`)
+              .join("");
+            const srcs = (sec.sources || [])
+              .map(
+                (s) =>
+                  `<a class="source-link" href="${safe(s.url)}" target="_blank" rel="noopener">${safe(s.title)}</a>`,
+              )
+              .join("");
+
+            html += `
+          <div class="section-card" id="sec-${i}">
+            <div class="section-head" onclick="toggleSection('sec-${i}')">
+              <span class="section-num">${String(i + 1).padStart(2, "0")}</span>
+              <span class="section-heading">${safe(sec.heading)}</span>
+              <span class="section-chevron">▼</span>
+            </div>
+            <div class="section-body">
+              ${sec.content ? `<p class="section-content">${safe(sec.content)}</p>` : ""}
+              ${pts ? `<p class="keypoints-label">Key Points</p><ul class="keypoints-list">${pts}</ul>` : ""}
+              ${srcs ? `<div class="sources-row">${srcs}</div>` : ""}
+            </div>
+          </div>`;
+          });
+        }
+
+        /* 2-col panels */
+        html += `<div class="panels">`;
+
+        /* Key Facts */
+        if ((d.keyFacts || []).length) {
+          html += `<div class="panel">
+        <div class="panel-title">Key Facts</div>
+        <ul class="fact-list">${d.keyFacts.map((f) => `<li>${safe(f)}</li>`).join("")}</ul>
+      </div>`;
+        }
+
+        /* Use Cases */
+        if ((d.useCases || []).length) {
+          html += `<div class="panel">
+        <div class="panel-title">Use Cases</div>
+        <ul class="use-list">${d.useCases.map((u) => `<li>${safe(u)}</li>`).join("")}</ul>
+      </div>`;
+        }
+
+        /* Tech Stack */
+        if (stackCount) {
+          html += `<div class="panel">
+        <div class="panel-title">Tech Stack</div>
+        <div class="tag-cloud">${d.techStack.map((t) => `<span class="tag">${safe(t)}</span>`).join("")}</div>
+      </div>`;
+        }
+
+        /* Limitations */
+        if ((d.limitations || []).length) {
+          html += `<div class="panel">
+        <div class="panel-title">Limitations</div>
+        <ul class="limit-list">${d.limitations.map((l) => `<li>${safe(l)}</li>`).join("")}</ul>
+      </div>`;
+        }
+
+        html += `</div>`;
+
+        /* Future Outlook */
+        if (d.futureOutlook) {
+          html += `<div class="outlook-card">
+        <div class="panel-title">Future Outlook</div>
+        <p class="outlook-text">${safe(d.futureOutlook)}</p>
+      </div>`;
+        }
+
+        /* All Sources */
+        if (srcCount) {
+          html += `<div class="report-section-label">All Sources (${srcCount})</div>
+      <div class="sources-grid">`;
+          d.allSources.forEach((s) => {
+            let domain = "";
+            try {
+              domain = new URL(s.url).hostname.replace("www.", "");
+            } catch {}
+            html += `<a class="src-card" href="${safe(s.url)}" target="_blank" rel="noopener">
+          <span class="src-icon">↗</span>
+          <div>
+            <div class="src-title">${safe(s.title)}</div>
+            <div class="src-url">${safe(domain)}</div>
+          </div>
+        </a>`;
+          });
+          html += `</div>`;
+        }
+
+        reportEl.innerHTML = html;
+        reportEl.style.display = "block";
+        reportEl.scrollIntoView({ behavior: "smooth", block: "start" });
+
+        /* open first section by default */
+        const firstSec = document.getElementById("sec-0");
+        if (firstSec) firstSec.classList.add("open");
+      }
+
+      function toggleSection(id) {
+        document.getElementById(id)?.classList.toggle("open");
+      }
+
+      function resetUI() {
+        reportEl.style.display = "none";
+        reportEl.innerHTML = "";
+        errorBox.style.display = "none";
+        heroSec.style.display = "block";
+        input.value = "";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        setTimeout(() => input.focus(), 300);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "name": "multi_agent",
+  "version": "1.0.0",
+  "description": "A multi-agent system for simultaneous Working",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "author": "Piyush Yadav",
+  "license": "ISC",
+  "dependencies": {
+    "@google/genai": "^2.8.0",
+    "cors": "^2.8.6",
+    "crypto": "^1.0.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "groq-sdk": "^1.2.1",
+    "readline": "^1.3.0"
+  }
+}
