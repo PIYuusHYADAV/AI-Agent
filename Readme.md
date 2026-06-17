@@ -14,7 +14,7 @@
 ---
 
 ## ⚡ Animated Architecture
-![Architecture](../assets/architecture.png)
+![Architecture](./architecture.png)
 
 ## 🔄 Request Lifecycle
 
