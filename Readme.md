@@ -14,7 +14,7 @@
 ---
 
 ## ⚡ Animated Architecture
-![Architecture](./architecture.png)
+![Architecture](./assets/multi_agent_architecture..png)
 
 ## 🔄 Request Lifecycle
 
