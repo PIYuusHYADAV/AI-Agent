@@ -57,7 +57,7 @@ Request ──▶ Validate ──▶ Plan ──▶ Search ──▶ Read ──
 
 ```bash
 git clone https://github.com/PIYuusHYADAV/AI-Agent
-cd AI_Agent
+cd AI-Agent
 npm install
 ```
 
