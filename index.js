@@ -38,6 +38,9 @@ async function summarizeMessages(messages) {
     ],
   };
 }
+app.get("/health", (req, res) => {
+  res.send("I am awake");
+});
 app.post("/research", async (req, res) => {
   const { topic } = req.body;
 
