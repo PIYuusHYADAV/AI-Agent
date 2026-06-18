@@ -37,7 +37,7 @@ async function summarizeMessages(messages) {
       { text: `Research summary so far: ${res.choices[0].message.content}` },
     ],
   };
-}
+};
 app.get("/health", (req, res) => {
   res.send("I am awake");
 });
