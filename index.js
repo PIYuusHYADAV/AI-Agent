@@ -7,6 +7,8 @@ import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
 import { withRetry } from "./utils.js";
+import { langcache } from "./api.js";
+import { saveToCache, checkCache } from "./cache.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -38,6 +40,9 @@ async function summarizeMessages(messages) {
     ],
   };
 }
+app.get("/health", (req, res) => {
+  res.send("I am awake");
+});
 app.post("/research", async (req, res) => {
   const { topic } = req.body;
 
@@ -45,7 +50,8 @@ app.post("/research", async (req, res) => {
   if (!isValid) {
     return res.status(400).json({ error: "Not tech-related" });
   }
-
+  const cached = await checkCache(topic);
+  if (cached) return res.json({ ...cached, cached: true });
   const messages = [
     { role: "user", parts: [{ text: `Do proper research on ${topic}` }] },
   ];
@@ -70,7 +76,7 @@ app.post("/research", async (req, res) => {
           tools: [WebSearchTool],
           systemInstruction: `You are a deep AI/Tech research agent.
 Step 1: Use WebSearch to find relevant sources.
-Step 2: Use fetchUrl on AT LEAST 2-3 of the most relevant URLs before writing.
+Step 2: Use fetchUrl on AT LEAST 1-2 of the most relevant URLs before writing.
 Step 3: Return your final report as a VALID JSON object only — no markdown, no backticks, no explanation.
 Do not write the report after just one fetchUrl call.
 Start your response with { and end with }.
@@ -99,13 +105,15 @@ ${JSON.stringify(reportSchema, null, 2)}`,
       .replace(/```json/g, "")
       .replace(/```/g, "")
       .trim();
-
+    const report = JSON.parse(text);
     lastText = text;
-
+    await saveToCache(topic, report);
     return res.json(JSON.parse(text));
   }
   console.warn("⚠️ Max iterations reached, returning last response");
   try {
+    const report = JSON.parse(lastText);
+    await saveToCache(topic, report);
     return res.json(JSON.parse(lastText));
   } catch {
     return res
