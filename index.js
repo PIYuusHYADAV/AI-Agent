@@ -41,18 +41,16 @@ async function summarizeMessages(messages) {
   };
 }
 app.get("/health", (req, res) => {
-  res.send("I am awake");
+  res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 app.post("/research", async (req, res) => {
   const { topic } = req.body;
 
   const isValid = await validateInput(topic);
   if (!isValid.isTechRelated) {
-    return res
-      .status(400)
-      .json({
-        error: `Error occured due to ${isValid.reason} and suggestion ${isValid.suggestion}`,
-      });
+    return res.status(400).json({
+      error: `Error occured due to ${isValid.reason} and suggestion ${isValid.suggestion}`,
+    });
   }
   const cached = await checkCache(topic);
   if (cached) return res.json({ ...cached, cached: true });
