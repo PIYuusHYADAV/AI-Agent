@@ -71,21 +71,24 @@ export async function validateInput(q) {
       model: "gemini-3.5-flash",
       contents: q,
       config: {
-        systemInstruction: `You are an expert validator. Your job is to validate the input whether it is related to tech fields or upcoming tech fields
-      or not and return answer accordingly.!IMPORTANT inside the schema isTechRelated nested field should either be true or false. Never return an object.
-      State Your answer in this JSON schema.${JSON.stringify(validationSchema, null, 2)}`,
+        systemInstruction: `You are an expert input validator for a Tech/AI research system.
+
+Your job is to validate whether the input is related to a single, specific tech or AI topic.
+
+Rules:
+1. If the input is a single clear tech topic → isTechRelated: true
+2. If the input is NOT tech related → isTechRelated: false
+3. If the input is asking to COMPARE two topics (e.g. "MCP vs REST", "Python vs JavaScript") → isTechRelated: false, reason: "comparison"
+4. If the input is asking to MERGE or COMBINE two topics → isTechRelated: false, reason: "merge"
+5. If the input is vague or too broad (e.g. "AI stuff", "tech things") → isTechRelated: false, reason: "too_vague"
+
+IMPORTANT: Return ONLY valid JSON. No markdown, no backticks, no explanation.
+${JSON.stringify(validationSchema, null, 2)}`,
       },
     }),
   );
 
-  const result = res.text;
-  const cleaned = result
-    .replace(/```json/g, "")
-    .replace(/```/g, "")
-    .trim();
-  const parsed = JSON.parse(cleaned);
-  const isTechRelated =
-    parsed?.properties?.isTechRelated ?? parsed?.isTechRelated ?? false;
-  console.log("Is it validated=====", isTechRelated);
-  return isTechRelated;
+  const result = JSON.parse(res.text);
+  console.log(result);
+  return result;
 }

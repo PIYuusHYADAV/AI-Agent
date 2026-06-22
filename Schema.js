@@ -1,8 +1,7 @@
 export const validationSchema = {
-  title: "string",
-  properties: {
-    isTechRelated: { type: "boolean" },
-  },
+  isTechRelated: true,
+  reason: "string",
+  suggestion: "string",
 };
 export const reportSchema = {
   title: "string",

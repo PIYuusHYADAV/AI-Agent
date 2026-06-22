@@ -47,8 +47,12 @@ app.post("/research", async (req, res) => {
   const { topic } = req.body;
 
   const isValid = await validateInput(topic);
-  if (!isValid) {
-    return res.status(400).json({ error: "Not tech-related" });
+  if (!isValid.isTechRelated) {
+    return res
+      .status(400)
+      .json({
+        error: `Error occured due to ${isValid.reason} and suggestion ${isValid.suggestion}`,
+      });
   }
   const cached = await checkCache(topic);
   if (cached) return res.json({ ...cached, cached: true });
